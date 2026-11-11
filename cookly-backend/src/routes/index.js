@@ -5,10 +5,12 @@
 const express = require('express');
 const healthRoutes = require('./healthRoutes');
 const authRoutes = require('./authRoutes');
+const mealRoutes = require('./mealRoutes');
 
 const router = express.Router();
 
 router.use('/health', healthRoutes);
 router.use('/auth', authRoutes);
+router.use('/meals', mealRoutes);
 
 module.exports = router;
