@@ -41,6 +41,10 @@ class ApiError extends Error {
   static badGateway(message = 'Upstream service failed') {
     return new ApiError(502, message);
   }
+
+  static gatewayTimeout(message = 'Upstream service took too long to respond') {
+    return new ApiError(504, message);
+  }
 }
 
 module.exports = ApiError;
