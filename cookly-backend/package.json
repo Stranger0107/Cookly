@@ -1,7 +1,7 @@
 {
-  "name": "pantry-chef-backend",
+  "name": "cookly-backend",
   "version": "1.0.0",
-  "description": "REST API for Pantry Chef - find recipes from what's in your pantry, save favourites and build shopping lists",
+  "description": "REST API for Cookly - find recipes from what you already have, save favourites and build shopping lists",
   "main": "src/server.js",
   "type": "commonjs",
   "scripts": {

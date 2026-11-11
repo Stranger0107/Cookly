@@ -13,7 +13,7 @@ async function start() {
     await connectDB(env.mongoUri);
 
     const server = app.listen(env.port, () => {
-      console.log(`Pantry Chef API running on http://localhost:${env.port} (${env.nodeEnv})`);
+      console.log(`Cookly API running on http://localhost:${env.port} (${env.nodeEnv})`);
     });
 
     const shutdown = (signal) => {

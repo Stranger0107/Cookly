@@ -48,7 +48,7 @@ if (!env.isTest) {
 
 // --- Routes ----------------------------------------------------------------
 app.get('/', (req, res) => {
-  res.json({ success: true, data: { name: 'Pantry Chef API', docs: '/api/health' } });
+  res.json({ success: true, data: { name: 'Cookly API', docs: '/api/health' } });
 });
 
 app.use('/api', apiRoutes);
