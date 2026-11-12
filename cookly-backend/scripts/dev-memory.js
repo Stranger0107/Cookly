@@ -20,6 +20,9 @@ async function main() {
 
   const mongo = await MongoMemoryServer.create({
     instance: { dbPath: DB_PATH, storageEngine: 'wiredTiger', dbName: 'cookly' },
+    // Reuse the MongoDB binary in this package's node_modules even when the
+    // script is started from another folder (e.g. `npm --prefix cookly-backend`).
+    binary: { downloadDir: path.resolve(__dirname, '../node_modules/.cache/mongodb-memory-server') },
   });
 
   process.env.MONGO_URI = mongo.getUri('cookly');
