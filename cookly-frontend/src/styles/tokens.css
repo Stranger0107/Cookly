@@ -1,0 +1,149 @@
+/* ==========================================================================
+   Design tokens - colours, type, radius, shadows, glass.
+   Light is the default; dark applies via the OS setting or data-theme="dark".
+   ========================================================================== */
+
+:root {
+  /* Fonts */
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-ui: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Radius */
+  --r-tile: 28px;
+  --r-inner: 14px;
+  --r-sm: 10px;
+  --r-pill: 999px;
+
+  /* Spacing (8pt) */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-12: 48px;
+
+  --gutter: 20px;
+  --content-max: 1200px;
+  --row: 180px;
+
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* ---- Light palette ---- */
+  --bg: #fff6ee;
+  --blob-1: #ff8a5b;
+  --blob-2: #ffc857;
+  --blob-3: #7bc9a0;
+  --blob-4: #ffb4a2;
+  --blob-opacity: 0.55;
+
+  --surface: #fffbf7;
+  --surface-2: #f7efe7;
+  --surface-3: #efe4d9;
+  --border: #eadfd4;
+
+  --text: #1f1b16;
+  --text-2: #6b6158;
+  --text-muted: #8c8177;
+
+  --primary: #f25c2a;
+  --primary-hover: #d94c1d;
+  --primary-soft: #fde3d7;
+  --on-primary: #ffffff;
+  --herb: #2e9e6b;
+  --herb-soft: #daf1e5;
+  --saffron: #f5a524;
+  --saffron-soft: #fdefd3;
+  --danger: #d93f3f;
+  --danger-soft: #fbe0e0;
+  --info: #3d7bf2;
+
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-strong: rgba(255, 255, 255, 0.78);
+  --glass-border: rgba(255, 255, 255, 0.65);
+  --glass-shadow: 0 8px 32px rgba(31, 27, 22, 0.08);
+  --tile-shadow: 0 1px 2px rgba(31, 27, 22, 0.04), 0 8px 24px rgba(31, 27, 22, 0.05);
+  --tile-shadow-hover: 0 2px 4px rgba(31, 27, 22, 0.06), 0 16px 40px rgba(31, 27, 22, 0.1);
+  --focus: 0 0 0 3px rgba(245, 165, 36, 0.55);
+
+  color-scheme: light;
+}
+
+/* Dark palette - used when the OS prefers dark and the user hasn't forced light. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #12100e;
+    --blob-opacity: 0.22;
+    --surface: #1c1916;
+    --surface-2: #25211d;
+    --surface-3: #2f2a25;
+    --border: #3a332d;
+    --text: #f6efe8;
+    --text-2: #c4b8ac;
+    --text-muted: #9a8f85;
+    --primary: #ff7a4d;
+    --primary-hover: #ff9068;
+    --primary-soft: rgba(255, 122, 77, 0.16);
+    --on-primary: #1a0e08;
+    --herb: #4cc38a;
+    --herb-soft: rgba(76, 195, 138, 0.16);
+    --saffron: #ffb84d;
+    --saffron-soft: rgba(255, 184, 77, 0.16);
+    --danger: #ff6b6b;
+    --danger-soft: rgba(255, 107, 107, 0.15);
+    --glass-bg: rgba(28, 25, 22, 0.55);
+    --glass-strong: rgba(28, 25, 22, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --tile-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
+    --tile-shadow-hover: 0 2px 4px rgba(0, 0, 0, 0.35), 0 16px 40px rgba(0, 0, 0, 0.4);
+    color-scheme: dark;
+  }
+}
+
+/* Same dark palette when the user picks Dark explicitly. */
+:root[data-theme='dark'] {
+  --bg: #12100e;
+  --blob-opacity: 0.22;
+  --surface: #1c1916;
+  --surface-2: #25211d;
+  --surface-3: #2f2a25;
+  --border: #3a332d;
+  --text: #f6efe8;
+  --text-2: #c4b8ac;
+  --text-muted: #9a8f85;
+  --primary: #ff7a4d;
+  --primary-hover: #ff9068;
+  --primary-soft: rgba(255, 122, 77, 0.16);
+  --on-primary: #1a0e08;
+  --herb: #4cc38a;
+  --herb-soft: rgba(76, 195, 138, 0.16);
+  --saffron: #ffb84d;
+  --saffron-soft: rgba(255, 184, 77, 0.16);
+  --danger: #ff6b6b;
+  --danger-soft: rgba(255, 107, 107, 0.15);
+  --glass-bg: rgba(28, 25, 22, 0.55);
+  --glass-strong: rgba(28, 25, 22, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --tile-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
+  --tile-shadow-hover: 0 2px 4px rgba(0, 0, 0, 0.35), 0 16px 40px rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
+}
+
+@media (max-width: 1024px) {
+  :root {
+    --gutter: 16px;
+    --row: 160px;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --gutter: 12px;
+    --r-tile: 22px;
+    --row: 150px;
+  }
+}
