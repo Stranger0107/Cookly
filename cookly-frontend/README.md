@@ -37,8 +37,10 @@ In development, Vite proxies every `/api` request to `http://localhost:5000`
 |----------------|---------|-------------|
 | `VITE_API_URL` | `/api`  | API base URL. Leave empty locally; set it to your deployed API (e.g. `https://cookly-api.onrender.com/api`) for production builds. |
 
-If the frontend and API are on different domains in production, add the frontend's URL to
-the backend's `CLIENT_URL` so CORS allows it.
+In production the backend serves the built app itself (`npm run build`, then the API serves
+`dist/` on the same URL), so `VITE_API_URL` stays empty. See [DEPLOY.md](../DEPLOY.md).
+If you host the frontend on a different domain instead, set `VITE_API_URL` and add the
+frontend's URL to the backend's `CLIENT_URL` so CORS allows it.
 
 ### Scripts
 

@@ -56,6 +56,7 @@ curl http://localhost:5000/api/health
 | `JWT_EXPIRES_IN`  | no       | `7d`                                      | Token lifetime, e.g. `1h`, `7d`                     |
 | `MEALDB_BASE_URL` | no       | `https://www.themealdb.com/api/json/v1/1` | TheMealDB base URL (`1` is the free test key)       |
 | `CLIENT_URL`      | no       | `http://localhost:5173`                   | Allowed CORS origin(s), comma-separated             |
+| `CLIENT_DIST`     | no       | `../cookly-frontend/dist`                 | Built React app. If it exists, the API serves it for all non-`/api` URLs |
 
 Generate a good secret with:
 

@@ -1,0 +1,34 @@
+# Render Blueprint - deploys Cookly as ONE web service:
+# Express serves the API at /api and the built React app for every other URL.
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: cookly
+    runtime: node
+    plan: free
+    region: singapore
+    branch: main
+    # Backend: production deps only (skips mongodb-memory-server and its ~700 MB binary).
+    # Frontend: needs dev deps (Vite) to build, then only the static dist/ is used.
+    buildCommand: >-
+      npm --prefix cookly-backend ci --omit=dev &&
+      npm --prefix cookly-frontend ci --include=dev &&
+      npm --prefix cookly-frontend run build
+    startCommand: npm --prefix cookly-backend start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false # you paste your MongoDB Atlas connection string in the Render dashboard
+      - key: JWT_SECRET
+        generateValue: true # Render generates a long random secret
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: MEALDB_BASE_URL
+        value: https://www.themealdb.com/api/json/v1/1
+      - key: MONGOMS_DISABLE_POSTINSTALL
+        value: '1'
