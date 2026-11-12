@@ -25,12 +25,13 @@ app.use(
   })
 );
 
-// Basic protection against brute force / abuse: 100 requests per 15 min per IP.
+// Basic protection against brute force / abuse: 100 requests per 15 min per IP
+// in production. Looser locally, where one dashboard load fires several calls.
 app.use(
   '/api',
   rateLimit({
     windowMs: 15 * 60 * 1000,
-    limit: 100,
+    limit: env.isProduction ? 100 : 1000,
     standardHeaders: 'draft-7',
     legacyHeaders: false,
     skip: () => env.isTest,
