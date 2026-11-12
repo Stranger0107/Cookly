@@ -24,7 +24,7 @@ async function search(req, res) {
 // GET /api/meals/ingredient?i=
 async function byIngredient(req, res) {
   const { i } = matchedData(req);
-  sendList(res, await mealdb.filterByIngredient(i));
+  sendList(res, await mealdb.searchByIngredient(i)); // includes plural + synonyms
 }
 
 // GET /api/meals/category?c=

@@ -15,6 +15,8 @@ const { env } = require('../config/env');
 const ApiError = require('../utils/ApiError');
 const TTLCache = require('../utils/cache');
 const { normalizeMeal, normalizeMealSummary } = require('../utils/normalizeMeal');
+const { mealdbSearchTerms } = require('../utils/normalizeIngredient');
+const { areaTerms } = require('../utils/areaAliases');
 
 const REQUEST_TIMEOUT_MS = 8000;
 
@@ -91,10 +93,29 @@ async function filterByCategory(category) {
   return asArray(data.meals).map(normalizeMealSummary);
 }
 
-/** filter.php?a=  -> summaries. */
+// Merge several result lists, dropping duplicate meals (first one wins).
+function uniqueMeals(lists) {
+  const seen = new Set();
+  return lists.flat().filter((meal) => !seen.has(meal.mealdbId) && seen.add(meal.mealdbId));
+}
+
+/**
+ * Ingredient search for people, not machines: tries singular/plural and
+ * synonyms ("mutton" -> lamb, goat meat) and merges the results.
+ * Used by the Explore page; the match service calls filterByIngredient per term itself.
+ */
+async function searchByIngredient(ingredient) {
+  const terms = mealdbSearchTerms(ingredient);
+  const lists = await Promise.all(terms.map((term) => filterByIngredient(term)));
+  return uniqueMeals(lists);
+}
+
+/** filter.php?a= for the cuisine name AND its country ("Indian" + "India") -> summaries. */
 async function filterByArea(area) {
-  const data = await request('filter.php', { a: area });
-  return asArray(data.meals).map(normalizeMealSummary);
+  const lists = await Promise.all(
+    areaTerms(area).map((term) => request('filter.php', { a: term }).then((data) => asArray(data.meals)))
+  );
+  return uniqueMeals(lists.map((list) => list.map(normalizeMealSummary)));
 }
 
 /** lookup.php?i=  -> one full meal, or null if the id doesn't exist. */
@@ -134,6 +155,7 @@ async function listCategories() {
 module.exports = {
   searchByName,
   filterByIngredient,
+  searchByIngredient,
   filterByCategory,
   filterByArea,
   getMealById,
