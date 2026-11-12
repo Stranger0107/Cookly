@@ -1,0 +1,18 @@
+{
+  "name": "cookly",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Cookly - recipe finder and manager (Express API + React app)",
+  "author": "Pratham Masurkar",
+  "scripts": {
+    "setup": "npm install && npm --prefix cookly-backend install && npm --prefix cookly-frontend install",
+    "dev": "concurrently -k -n api,web -c yellow,cyan \"npm --prefix cookly-backend run dev:memory\" \"npm --prefix cookly-frontend run dev\"",
+    "dev:db": "concurrently -k -n api,web -c yellow,cyan \"npm --prefix cookly-backend run dev\" \"npm --prefix cookly-frontend run dev\"",
+    "build": "npm --prefix cookly-frontend run build",
+    "start": "npm --prefix cookly-backend start",
+    "test": "npm --prefix cookly-backend test"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.7"
+  }
+}
