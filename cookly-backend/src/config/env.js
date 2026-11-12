@@ -19,6 +19,8 @@ const env = {
     .split(',')
     .map((url) => url.trim())
     .filter(Boolean),
+  // Built React app (`npm run build` in cookly-frontend). If it exists, the API serves it too.
+  clientDist: process.env.CLIENT_DIST || path.resolve(__dirname, '../../../cookly-frontend/dist'),
 };
 
 env.isProduction = env.nodeEnv === 'production';
