@@ -78,6 +78,26 @@ describe('mealdbService', () => {
     await expect(mealdb.searchByName('x')).rejects.toMatchObject({ statusCode: 502 });
   });
 
+  it('searches a cuisine by name AND country, merging duplicates ("Indian" + "India")', async () => {
+    get.mockImplementation((path, { params }) =>
+      ok({ meals: params.a === 'India' ? [rawMeal(1, 'Dal fry'), rawMeal(2, 'Chicken Handi')] : params.a === 'Indian' ? [rawMeal(2, 'Chicken Handi')] : null })
+    );
+
+    const meals = await mealdb.filterByArea('Indian');
+
+    expect(get).toHaveBeenCalledWith('filter.php', { params: { a: 'Indian' } });
+    expect(get).toHaveBeenCalledWith('filter.php', { params: { a: 'India' } });
+    expect(meals.map((m) => m.title)).toEqual(['Chicken Handi', 'Dal fry']);
+  });
+
+  it('ingredient search for Explore uses synonyms (mutton -> lamb)', async () => {
+    get.mockImplementation((path, { params }) => ok({ meals: params.i === 'lamb' ? [rawMeal(7, 'Lamb Biryani')] : null }));
+
+    const meals = await mealdb.searchByIngredient('mutton');
+
+    expect(meals.map((m) => m.title)).toEqual(['Lamb Biryani']);
+  });
+
   it('sends multi-word ingredients with underscores', async () => {
     get.mockReturnValue(ok({ meals: [] }));
     await mealdb.filterByIngredient('chicken breast');

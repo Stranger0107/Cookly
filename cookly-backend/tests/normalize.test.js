@@ -105,4 +105,32 @@ describe('mealdbSearchTerms', () => {
   it('returns nothing for blank input', () => {
     expect(mealdbSearchTerms('   ')).toEqual([]);
   });
+
+  it("also searches TheMealDB's names for synonyms (mutton -> lamb, goat meat)", () => {
+    const terms = mealdbSearchTerms('Mutton');
+    expect(terms).toEqual(expect.arrayContaining(['mutton', 'lamb', 'lambs', 'goat meat']));
+  });
+
+  it('maps Indian-English names (capsicum -> peppers, curd -> yogurt)', () => {
+    expect(mealdbSearchTerms('capsicum')).toEqual(expect.arrayContaining(['red pepper', 'green pepper']));
+    expect(mealdbSearchTerms('curd')).toEqual(expect.arrayContaining(['yogurt', 'yoghurt']));
+  });
+
+  it('caps the number of search terms per ingredient', () => {
+    expect(mealdbSearchTerms('capsicum').length).toBeLessThanOrEqual(8);
+  });
+});
+
+describe('areaTerms', () => {
+  const { areaTerms } = require('../src/utils/areaAliases');
+
+  it('adds the country name TheMealDB actually stores ("Indian" -> "India")', () => {
+    expect(areaTerms('Indian')).toEqual(['Indian', 'India']);
+    expect(areaTerms('french')).toEqual(['french', 'France']);
+  });
+
+  it('works the other way round, and leaves unknown cuisines alone', () => {
+    expect(areaTerms('India')).toEqual(['India', 'indian']);
+    expect(areaTerms('Atlantean')).toEqual(['Atlantean']);
+  });
 });

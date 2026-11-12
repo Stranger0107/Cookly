@@ -63,6 +63,15 @@ describe('scoreRecipe', () => {
   it('returns null when none of the pantry ingredients are used (staples alone do not count)', () => {
     expect(scoreRecipe(ing('Salt', 'Water', 'Flour'), pantry)).toBeNull();
   });
+
+  it('understands synonyms: mutton matches Lamb, capsicum matches Red Pepper', () => {
+    const score = scoreRecipe(ing('Lamb Shoulder', 'Red Pepper', 'Rice'), ['mutton', 'capsicum']);
+    expect(score.matchedIngredients).toEqual(['Lamb Shoulder', 'Red Pepper']);
+  });
+
+  it('applies synonyms in both directions (my recipe says Mutton, pantry says lamb)', () => {
+    expect(scoreRecipe(ing('Mutton', 'Onion'), ['lamb']).matchedIngredients).toEqual(['Mutton']);
+  });
 });
 
 describe('rankCandidateIds', () => {
@@ -198,6 +207,22 @@ describe('POST /api/match', () => {
     expect(res.status).toBe(200);
     expect(res.body.data.results.map((r) => r.title)).toEqual(['Egg Fried Rice']);
     expect(res.body.data.warnings[0]).toMatch(/unavailable/);
+  });
+
+  it('lists ingredients TheMealDB has no recipes for (e.g. okra)', async () => {
+    await Recipe.create({ title: 'Bhindi Masala', ingredients: ing('Okra', 'Onion'), owner: user.user._id });
+
+    const res = await match({ ingredients: ['okra', 'egg'] });
+
+    expect(res.body.data.notInMealDb).toEqual(['okra']);
+    // my own okra recipe still matches
+    expect(res.body.data.results.map((r) => r.title)).toContain('Bhindi Masala');
+  });
+
+  it('searches TheMealDB with synonyms (mutton -> lamb)', async () => {
+    await match({ ingredients: ['mutton'] });
+    const terms = mealdb.filterByIngredient.mock.calls.map(([term]) => term);
+    expect(terms).toEqual(expect.arrayContaining(['mutton', 'lamb', 'goat meat']));
   });
 
   it('respects the limit option', async () => {
