@@ -41,7 +41,7 @@ async function listRecipes(req, res) {
   // Run the page query and the total count at the same time.
   const [results, total] = await Promise.all([
     Recipe.find(filter)
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: -1, _id: -1 }) // _id breaks ties so pages never overlap
       .skip((page - 1) * limit)
       .limit(limit),
     Recipe.countDocuments(filter),
