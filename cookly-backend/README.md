@@ -70,6 +70,7 @@ The server refuses to start if `MONGO_URI` or `JWT_SECRET` is missing.
 | Command                 | What it does                               |
 |-------------------------|--------------------------------------------|
 | `npm run dev`           | Start with nodemon (restarts on changes)   |
+| `npm run dev:memory`    | Start with a local MongoDB (no install needed; data kept in `.data/`) |
 | `npm start`             | Start normally (production)                |
 | `npm test`              | Run the Jest test suite                    |
 | `npm run test:watch`    | Re-run tests on file changes               |
