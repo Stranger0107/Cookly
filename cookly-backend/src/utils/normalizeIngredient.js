@@ -52,16 +52,32 @@ function normalizeIngredient(name) {
 }
 
 /**
- * TheMealDB's filter.php only does EXACT name matches, and it is
- * inconsistent: "egg" and "eggs" return different meals. So for each
- * ingredient we search a couple of spellings and merge the results.
- *   mealdbSearchTerms("Tomatoes") -> ["tomato", "tomatoes"]
+ * Synonyms: people (and recipes) call the same thing different names.
+ * "mutton" is "Lamb" / "Goat Meat" in TheMealDB, "capsicum" is "Red Pepper",
+ * "curd" is "Yogurt". The list lives in src/data/ingredientSynonyms.json and
+ * is shared with the frontend. Keys and values are normalized once, here.
  */
-function mealdbSearchTerms(raw) {
-  const singular = normalizeIngredient(raw);
-  if (!singular) return [];
+const RAW_SYNONYMS = require('../data/ingredientSynonyms.json');
 
-  const words = singular.split(' ');
+const SYNONYMS = new Map(
+  Object.entries(RAW_SYNONYMS)
+    .filter(([key]) => !key.startsWith('_'))
+    .map(([key, values]) => [normalizeIngredient(key), values.map(normalizeIngredient)])
+);
+
+/** Other names for an (already normalized) ingredient: synonymsOf("mutton") -> ["lamb", "goat meat"] */
+function synonymsOf(normalized) {
+  return SYNONYMS.get(normalized) || [];
+}
+
+/** The ingredient plus its synonyms, all normalized. */
+function expandIngredient(normalized) {
+  return [normalized, ...synonymsOf(normalized)];
+}
+
+/** Simple English plural of the LAST word: "chicken breast" -> "chicken breasts" */
+function pluralOf(phrase) {
+  const words = phrase.split(' ');
   const last = words.pop();
 
   let plural;
@@ -69,8 +85,26 @@ function mealdbSearchTerms(raw) {
   else if (/[^aeiou]y$/.test(last)) plural = `${last.slice(0, -1)}ies`;
   else plural = `${last}s`;
 
-  const terms = [singular, [...words, plural].join(' '), raw.trim().toLowerCase()];
-  return [...new Set(terms)].filter(Boolean);
+  return [...words, plural].join(' ');
 }
 
-module.exports = { normalizeIngredient, singularize, mealdbSearchTerms };
+const MAX_TERMS = 8; // cap TheMealDB calls per ingredient
+
+/**
+ * TheMealDB's filter.php only does EXACT name matches, and it is
+ * inconsistent: "egg" and "eggs" return different meals. So for each
+ * ingredient we search a couple of spellings, plus its synonyms, and merge.
+ *   mealdbSearchTerms("Tomatoes") -> ["tomato", "tomatoes"]
+ *   mealdbSearchTerms("mutton")   -> ["mutton", "muttons", "lamb", "lambs", "goat meat", "goat meats"]
+ */
+function mealdbSearchTerms(raw) {
+  const singular = normalizeIngredient(raw);
+  if (!singular) return [];
+
+  const terms = [singular, pluralOf(singular), raw.trim().toLowerCase()];
+  for (const synonym of synonymsOf(singular)) terms.push(synonym, pluralOf(synonym));
+
+  return [...new Set(terms)].filter(Boolean).slice(0, MAX_TERMS);
+}
+
+module.exports = { normalizeIngredient, singularize, mealdbSearchTerms, synonymsOf, expandIngredient };

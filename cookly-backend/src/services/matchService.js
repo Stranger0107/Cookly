@@ -18,7 +18,7 @@
  */
 const Recipe = require('../models/Recipe');
 const mealdb = require('./mealdbService');
-const { normalizeIngredient, mealdbSearchTerms } = require('../utils/normalizeIngredient');
+const { normalizeIngredient, mealdbSearchTerms, expandIngredient } = require('../utils/normalizeIngredient');
 
 const DEFAULTS = {
   includeMealDb: true,
@@ -53,6 +53,19 @@ function ingredientMatches(recipeIngredient, pantryItem) {
   );
 }
 
+/**
+ * Like ingredientMatches, but synonyms count too, in both directions:
+ *   pantry "mutton"  matches recipe "Lamb Shoulder"  (mutton -> lamb)
+ *   pantry "zucchini" matches recipe "Courgettes"    (zucchini -> courgette)
+ *   pantry "lamb"    matches a user's recipe "Mutton" (mutton -> lamb, reversed)
+ */
+function matchesWithSynonyms(recipeIngredient, pantryItem) {
+  return (
+    expandIngredient(pantryItem).some((term) => ingredientMatches(recipeIngredient, term)) ||
+    expandIngredient(recipeIngredient).some((term) => ingredientMatches(term, pantryItem))
+  );
+}
+
 // Normalize raw user input into a de-duplicated pantry: ["Eggs ", "egg"] -> ["egg"]
 const toPantry = (ingredients) => [...new Set(ingredients.map(normalizeIngredient).filter(Boolean))];
 
@@ -70,7 +83,7 @@ function splitIngredients(recipeIngredients, pantry, { assumeStaples = true } = 
     const key = normalizeIngredient(ingredient.name);
     if (!key) continue;
 
-    if (pantry.some((item) => ingredientMatches(key, item))) {
+    if (pantry.some((item) => matchesWithSynonyms(key, item))) {
       matchedIngredients.push(ingredient.name);
       pantryHits += 1;
     } else if (assumeStaples && PANTRY_STAPLES.has(key)) {
@@ -186,9 +199,19 @@ async function findMealDbCandidates(pantry, savedIds, maxCandidates) {
 
   const totalCalls = perIngredient.reduce((sum, list) => sum + list.length, 0);
   if (failedCalls === totalCalls) {
-    return { meals: [], warnings: ['TheMealDB is unavailable right now; showing only your recipes'] };
+    return {
+      meals: [],
+      notInMealDb: [],
+      warnings: ['TheMealDB is unavailable right now; showing only your recipes'],
+    };
   }
   if (failedCalls > 0) warnings.push('Some TheMealDB searches failed; results may be incomplete');
+
+  // Ingredients TheMealDB has no recipes for at all (e.g. "okra"), so the UI
+  // can say so instead of the user wondering why nothing matched.
+  const notInMealDb = pantry.filter(
+    (item, i) => idLists[i].length === 0 && perIngredient[i].every((s) => s.status === 'fulfilled')
+  );
 
   const topIds = rankCandidateIds(idLists, savedIds).slice(0, maxCandidates);
 
@@ -198,7 +221,7 @@ async function findMealDbCandidates(pantry, savedIds, maxCandidates) {
 
   if (meals.length < topIds.length) warnings.push('Some TheMealDB recipes could not be loaded');
 
-  return { meals, warnings };
+  return { meals, warnings, notInMealDb };
 }
 
 // ---------------------------------------------------------------------------
@@ -213,9 +236,9 @@ async function findMatches({ userId, ingredients, ...options }) {
   const userRecipes = await loadUserRecipes(userId);
   const savedIds = new Set(userRecipes.filter((r) => r.mealdbId).map((r) => r.mealdbId));
 
-  const { meals, warnings } = opts.includeMealDb
+  const { meals, warnings, notInMealDb } = opts.includeMealDb
     ? await findMealDbCandidates(pantry, savedIds, opts.mealdbCandidates)
-    : { meals: [], warnings: [] };
+    : { meals: [], warnings: [], notInMealDb: [] };
 
   const results = [];
 
@@ -237,6 +260,7 @@ async function findMatches({ userId, ingredients, ...options }) {
     count: Math.min(results.length, opts.limit),
     results: results.slice(0, opts.limit),
     ...(warnings.length && { warnings }),
+    ...(notInMealDb.length && { notInMealDb }),
   };
 }
 
