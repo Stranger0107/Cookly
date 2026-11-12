@@ -3,7 +3,10 @@
  * (cookly-backend/src/utils/normalizeIngredient.js + matchService).
  * Used on the recipe page to show "have / missing" instantly, without
  * another API call. Keep the two in sync if the rules change.
+ * The synonym list itself is the SAME file the backend uses.
  */
+import RAW_SYNONYMS from '../../../cookly-backend/src/data/ingredientSynonyms.json';
+
 const IRREGULAR = {
   leaves: 'leaf',
   loaves: 'loaf',
@@ -40,7 +43,20 @@ export function normalizeIngredient(name) {
 }
 
 const containsPhrase = (big, small) => ` ${big} `.includes(` ${small} `);
-const matches = (a, b) => a === b || containsPhrase(a, b) || containsPhrase(b, a);
+const plainMatch = (a, b) => a === b || containsPhrase(a, b) || containsPhrase(b, a);
+
+// "mutton" -> ["lamb", "goat meat"], normalized once.
+const SYNONYMS = new Map(
+  Object.entries(RAW_SYNONYMS)
+    .filter(([key]) => !key.startsWith('_'))
+    .map(([key, values]) => [normalizeIngredient(key), values.map(normalizeIngredient)])
+);
+const expand = (name) => [name, ...(SYNONYMS.get(name) || [])];
+
+// Recipe ingredient vs pantry item, with synonyms in both directions.
+const matches = (recipeName, pantryItem) =>
+  expand(pantryItem).some((t) => plainMatch(recipeName, t)) ||
+  expand(recipeName).some((t) => plainMatch(t, pantryItem));
 
 /** Split recipe ingredients into have / missing for a pantry (array of raw strings). */
 export function splitIngredients(ingredients, pantryRaw, { assumeStaples = true } = {}) {
@@ -73,6 +89,8 @@ const EMOJI = {
   beef: '🥩', fish: '🐟', mushroom: '🍄', pepper: '🌶️', avocado: '🥑', apple: '🍎', banana: '🍌',
   corn: '🌽', broccoli: '🥦', cucumber: '🥒', shrimp: '🦐', prawn: '🦐', bacon: '🥓', honey: '🍯',
   flour: '🌾', sugar: '🍬', chocolate: '🍫', strawberry: '🍓', lime: '🍋', ginger: '🫚', spinach: '🥬',
+  mutton: '🍖', lamb: '🍖', goat: '🍖', okra: '🫛', bhindi: '🫛', paneer: '🧀', aubergine: '🍆',
+  brinjal: '🍆', eggplant: '🍆', capsicum: '🫑', coconut: '🥥', peas: '🫛', pea: '🫛', curd: '🥣', yogurt: '🥣',
 };
 
 export function ingredientEmoji(name) {

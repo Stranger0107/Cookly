@@ -5,7 +5,7 @@
  */
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Sparkles, AlertTriangle, ShoppingBasket, Bookmark, BookmarkCheck, ArrowRight } from 'lucide-react';
+import { Sparkles, AlertTriangle, Info, ShoppingBasket, Bookmark, BookmarkCheck, ArrowRight } from 'lucide-react';
 import { matchApi } from '../api';
 import useAsync from '../hooks/useAsync';
 import usePantry from '../hooks/usePantry';
@@ -201,6 +201,15 @@ export default function MatchResults() {
               {w}
             </Banner>
           ))}
+          {data.notInMealDb?.length > 0 && (
+            <Banner type="info" icon={<Info size={18} />}>
+              TheMealDB has no recipes with <strong>{data.notInMealDb.join(', ')}</strong> yet, so those only
+              match your own recipes.{' '}
+              <Link to="/recipes/new" className="link">
+                Add a recipe
+              </Link>
+            </Banner>
+          )}
 
           <div className="filters">
             <div className="row row--wrap" role="group" aria-label="Filter by match">

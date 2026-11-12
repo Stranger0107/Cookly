@@ -432,6 +432,8 @@
 }
 .banner--warning { background: var(--saffron-soft); color: color-mix(in srgb, var(--saffron) 60%, var(--text)); }
 .banner--error { background: var(--danger-soft); color: var(--danger); }
+.banner--info { background: var(--surface); border: 1px solid var(--border); color: var(--text-2); }
+.banner--info > svg { color: var(--info); flex-shrink: 0; }
 
 /* ---- Toasts ---- */
 .toast-stack {

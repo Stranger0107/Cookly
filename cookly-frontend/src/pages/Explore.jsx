@@ -19,11 +19,13 @@ const MODES = [
   { value: 'area', label: 'By cuisine', icon: <Globe2 size={16} /> },
 ];
 
-// TheMealDB cuisines (the free API has no endpoint for this list we proxy).
+// Cuisines that actually have recipes in TheMealDB (checked against the live API).
+// The backend also searches each one's country name ("Indian" + "India").
 const AREAS = [
-  'American', 'British', 'Canadian', 'Chinese', 'Croatian', 'Dutch', 'Egyptian', 'French', 'Greek', 'Indian',
-  'Irish', 'Italian', 'Jamaican', 'Japanese', 'Kenyan', 'Malaysian', 'Mexican', 'Moroccan', 'Polish',
-  'Portuguese', 'Russian', 'Spanish', 'Thai', 'Tunisian', 'Turkish', 'Vietnamese',
+  'Algerian', 'American', 'Argentine', 'Australian', 'Brazilian', 'British', 'Canadian', 'Chinese', 'Croatian',
+  'Dutch', 'Egyptian', 'Filipino', 'French', 'Greek', 'Indian', 'Irish', 'Italian', 'Jamaican', 'Japanese',
+  'Kenyan', 'Malaysian', 'Mexican', 'Moroccan', 'Norwegian', 'Polish', 'Portuguese', 'Russian', 'Saudi Arabian',
+  'Spanish', 'Syrian', 'Thai', 'Tunisian', 'Turkish', 'Ukrainian', 'Uruguayan', 'Venezuelan', 'Vietnamese',
 ];
 
 const FETCHERS = {
@@ -171,7 +173,7 @@ export default function Explore() {
         <div className="tile">
           <EmptyState emoji="🔍" title={`No meals found for "${q}"`}>
             {mode === 'ingredient'
-              ? 'TheMealDB matches ingredient names exactly. Try the singular or plural, e.g. "egg" or "eggs".'
+              ? "TheMealDB doesn't have any recipes with this ingredient yet. Try a related one, or add your own recipe."
               : 'Try something else, or browse by category.'}
           </EmptyState>
         </div>
