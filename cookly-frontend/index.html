@@ -13,13 +13,7 @@
       rel="stylesheet"
     />
     <title>Cookly</title>
-    <script>
-      // Apply the saved theme before React loads so the page never flashes the wrong colours.
-      try {
-        var t = localStorage.getItem('cookly-theme');
-        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
-      } catch (e) {}
-    </script>
+    <script src="/theme.js"></script>
   </head>
   <body>
     <div id="root"></div>
