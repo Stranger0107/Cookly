@@ -53,12 +53,15 @@ function ingredientMatches(recipeIngredient, pantryItem) {
   );
 }
 
+// Normalize raw user input into a de-duplicated pantry: ["Eggs ", "egg"] -> ["egg"]
+const toPantry = (ingredients) => [...new Set(ingredients.map(normalizeIngredient).filter(Boolean))];
+
 /**
- * Score one recipe against the pantry.
- * Returns null if the recipe uses NONE of the user's ingredients
- * (staples alone don't count, or every recipe would match "water").
+ * Split a recipe's ingredients into the ones the user has and the ones
+ * they're missing. Shared by the matcher and the shopping list.
+ * `pantryHits` counts matches from the user's own list (staples excluded).
  */
-function scoreRecipe(recipeIngredients, pantry, { assumeStaples = true } = {}) {
+function splitIngredients(recipeIngredients, pantry, { assumeStaples = true } = {}) {
   const matchedIngredients = [];
   const missingIngredients = [];
   let pantryHits = 0;
@@ -76,6 +79,21 @@ function scoreRecipe(recipeIngredients, pantry, { assumeStaples = true } = {}) {
       missingIngredients.push({ name: ingredient.name, measure: ingredient.measure || '' });
     }
   }
+
+  return { matchedIngredients, missingIngredients, pantryHits };
+}
+
+/**
+ * Score one recipe against the pantry.
+ * Returns null if the recipe uses NONE of the user's ingredients
+ * (staples alone don't count, or every recipe would match "water").
+ */
+function scoreRecipe(recipeIngredients, pantry, options = {}) {
+  const { matchedIngredients, missingIngredients, pantryHits } = splitIngredients(
+    recipeIngredients,
+    pantry,
+    options
+  );
 
   const totalIngredients = matchedIngredients.length + missingIngredients.length;
   if (pantryHits === 0 || totalIngredients === 0) return null;
@@ -190,7 +208,7 @@ async function findMealDbCandidates(pantry, savedIds, maxCandidates) {
 async function findMatches({ userId, ingredients, ...options }) {
   const opts = { ...DEFAULTS, ...options };
 
-  const pantry = [...new Set(ingredients.map(normalizeIngredient).filter(Boolean))];
+  const pantry = toPantry(ingredients);
 
   const userRecipes = await loadUserRecipes(userId);
   const savedIds = new Set(userRecipes.filter((r) => r.mealdbId).map((r) => r.mealdbId));
@@ -224,6 +242,8 @@ async function findMatches({ userId, ingredients, ...options }) {
 
 module.exports = {
   findMatches,
+  toPantry,
+  splitIngredients,
   // exported for unit tests
   scoreRecipe,
   ingredientMatches,
