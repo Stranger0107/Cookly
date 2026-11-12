@@ -8,6 +8,7 @@ const authRoutes = require('./authRoutes');
 const mealRoutes = require('./mealRoutes');
 const recipeRoutes = require('./recipeRoutes');
 const matchRoutes = require('./matchRoutes');
+const shoppingListRoutes = require('./shoppingListRoutes');
 
 const router = express.Router();
 
@@ -16,5 +17,6 @@ router.use('/auth', authRoutes);
 router.use('/meals', mealRoutes);
 router.use('/recipes', recipeRoutes);
 router.use('/match', matchRoutes);
+router.use('/shopping-list', shoppingListRoutes);
 
 module.exports = router;
